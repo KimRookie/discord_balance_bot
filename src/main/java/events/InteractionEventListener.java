@@ -15,7 +15,7 @@ public class InteractionEventListener extends ListenerAdapter{
 		try {
 			switch (event.getName()) {
 			case "설명서": 
-				event.reply( "■ 해당 봇은 포지션을 고려하지 않고, 티어 순으로 팀을 만듭니다. ■\n"
+				event.reply( "**해당 봇은 포지션을 고려하지 않고, 티어 순으로 팀을 만듭니다.**\n"
 						+ "■ 기능요약 ■\n"
 						+ "■ !밸런스: 팀 밸런싱 실행 / !수정: 멤버 정보 수정 ■\n"
 						+ "■ 고정기능 활용 예시: 탑만하는 유저 둘이 같은 팀 되는 상황 방지, 라이벌 구도일 때 같은 팀 방지 ■\n"
