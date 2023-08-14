@@ -1,9 +1,7 @@
 package events;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +20,7 @@ public class MessageEventListener extends ListenerAdapter{
 
     private final List<String> names = new ArrayList<>();
 	String tier;
+	List<String> NameAndTier = new ArrayList<>();
     List<Integer> scores = new ArrayList<>();
     String[] changeName;
 	int[] exchange = new int[2];
@@ -52,17 +51,21 @@ public class MessageEventListener extends ListenerAdapter{
 	    if (command.equals(prefix + "밸런스")) {
 	        names.clear();
 	        scores.clear();
+	        NameAndTier.clear();
 	        currentPlayer = 1;
 	        message.getChannel().sendMessage(currentPlayer + "번째 참여자의 닉네임과 티어를 입력해주세요" +" (예. @Player1 플2)").queue();
 	    } else if (command.matches("^@[\\p{L}\\p{N}]+$") && args.length == 2) {
 	            tier = args[1];
 	            names.add(command.substring(1, command.length()));
 	            scores.add(change(tier));
+	            NameAndTier.add(message.getContentDisplay().substring(1));
+	            System.out.println(NameAndTier);
 	            currentPlayer++;
 	            if (currentPlayer <= 10) {
 	                message.getChannel().sendMessage(currentPlayer + "번째 참여자를 입력하세요").queue();
 	            } else {
 	            	if(modify) {
+	            		modifyChange.clear(); // 수정 기능을 두 번 이상 이용할 시, 기존 수정 멤버 번호가 남아있는 현상 방지
 	            		for (int i = 0; i < changeName.length; i++) {
 	    	    			modifyChange.add(Integer.parseInt(changeName[i])-1);
 	    	    		}
@@ -73,6 +76,7 @@ public class MessageEventListener extends ListenerAdapter{
 							System.out.println(i);
 							names.remove(i);
 							scores.remove(i);
+							NameAndTier.remove(i);
             				System.out.println("names: " + names);
             				System.out.println("scores: " + scores);
 						}
@@ -90,14 +94,14 @@ public class MessageEventListener extends ListenerAdapter{
 	    	allowBotMessages = false;
 	    	namesList.clear();
 	    	for (int i = 0; i < names.size(); i++) {
-	    		namesList.add((i+1) + ". " + names.get(i) + " " + scores.get(i));
+	    		namesList.add((i+1) + ". " + NameAndTier.get(i));
 	    	}
 	    	String nameListMessage = String.join("\n", namesList);
 	    	event.getChannel().sendMessage(nameListMessage).queue();
 	    	if (command.equals("!fix")) {
 	    		event.getChannel().sendMessage("고정할 두 명의 번호를 입력하세요 (스페이스바로 구분, 예: 4 7): ").queue();
 			} else if(command.equals("!수정")) {
-				event.getChannel().sendMessage("빠지는 멤버의 번호를 입력하세요 (스페이스바로 구분, 예: 4 7): ").queue();
+				event.getChannel().sendMessage("빠지는 멤버의 번호를 입력하세요 (스페이스바로 구분, 예: 4 7 1): ").queue();
 				end = false; // 수정 전 첫 밸런싱때 end값이 true가 되어 팀 목록 다시 출력되는 것 방지
 			}
 	    	garbage = message.getContentRaw().split(" ");
@@ -111,6 +115,7 @@ public class MessageEventListener extends ListenerAdapter{
 	    			exchange[i] = Integer.parseInt(args[i])-1;
 	    			Collections.swap(names, i, exchange[i]);
 	    			Collections.swap(scores, i, exchange[i]);
+	    			Collections.swap(NameAndTier, i, exchange[i]);
 	    		}
 	    		fixed = "on";
 	    		garbage[0] = "";
@@ -129,6 +134,7 @@ public class MessageEventListener extends ListenerAdapter{
 	    	end = false;
 	    	List<List<String>> teams = balanceTeams(names, scores, fixed);
 	    	MessageEmbed embed = createEmbed(teams.get(0), teams.get(1));
+	    	System.out.println(NameAndTier);
 	    	message.getChannel().sendMessageEmbeds(embed).queue();
 	    }
 	    } catch (NumberFormatException e) {
@@ -309,6 +315,7 @@ public class MessageEventListener extends ListenerAdapter{
                 if (scores.get(i) < scores.get(j)) {
                     Collections.swap(names, i, j);
                     Collections.swap(scores, i, j);
+                    Collections.swap(NameAndTier, i, j);
                 }
             }
         }
