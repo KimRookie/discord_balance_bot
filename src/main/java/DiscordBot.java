@@ -10,9 +10,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 public class DiscordBot {
 	
 	public static void main(String[] args) throws LoginException {
-		final String TOKEN = "MTEzNzkwNTk4NjkzNDQxMTM3NQ.Gu1RST.SfYl92x6K71yNlYvG8xF500YBopjcIjQc7Q16k";
-//		String BOT_TOKEN = System.getenv("BOT_TOKEN");
-		JDABuilder jdaBuilder = JDABuilder.createDefault(TOKEN);
+		String BOT_TOKEN = System.getenv("BOT_TOKEN");
+		JDABuilder jdaBuilder = JDABuilder.createDefault(BOT_TOKEN);
 		JDA jda = jdaBuilder
 			.enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
 			.addEventListeners(new ReadyEventListener(), new MessageEventListener(), new InteractionEventListener())
