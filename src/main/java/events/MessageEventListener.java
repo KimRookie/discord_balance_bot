@@ -25,12 +25,10 @@ public class MessageEventListener extends ListenerAdapter{
     String[] changeName;
 	int[] exchange = new int[2];
 	ArrayList<Integer> modifyChange = new ArrayList<>();
-	int[] count = {0};
-	int total = 0;
     private int currentPlayer = 1;
     private String buttonId;
     List<String> namesList = new ArrayList<>();
-    String[] garbage = {""};
+    String garbage;
     String fixed = "off";
     private boolean modify = false;
     private boolean allowBotMessages = false; // 봇 메세지 허용 여부, false: 불가 / true: 허용
@@ -52,7 +50,14 @@ public class MessageEventListener extends ListenerAdapter{
 	        names.clear();
 	        scores.clear();
 	        NameAndTier.clear();
+	        modifyChange.clear();
+	        namesList.clear();
+	        changeName = null;
 	        currentPlayer = 1;
+	        modify = false;
+	        garbage ="";
+	        // !밸런스를 입력하면 onMessageReceived가 재시작 되야하는데, 실제론 if부터 다시 시작하기 때문에 위 변수들을 초기화해줘야 정상적으로 진행이 가능
+	        
 	        message.getChannel().sendMessage(currentPlayer + "번째 참여자의 닉네임과 티어를 입력해주세요" +" (예. @Player1 플2)").queue();
 	    } else if (command.matches("^@[\\p{L}\\p{N}]+$") && args.length == 2) {
 	            tier = args[1];
@@ -104,13 +109,13 @@ public class MessageEventListener extends ListenerAdapter{
 				event.getChannel().sendMessage("빠지는 멤버의 번호를 입력하세요 (스페이스바로 구분, 예: 4 7 1): ").queue();
 				end = false; // 수정 전 첫 밸런싱때 end값이 true가 되어 팀 목록 다시 출력되는 것 방지
 			}
-	    	garbage = message.getContentRaw().split(" ");
+	    	garbage = message.getContentDisplay();
 	    } else if (command.equals(prefix + "non-fix")) {
 	    	allowBotMessages = false;
 	    	event.getChannel().sendMessage("라인고정 없이 밸런스를 맞춥니다.").queue();
 	    	fixed="off";
 	    	end = true;
-	    } else if(garbage[0].equals("!fix")) {	// garbage로 !fix 메시지가 남아있는것 처리용도로 받은 다음, args로 고정한 번호 입력받은 것 intArray로 전환하여 swap
+	    } else if(garbage.equals("!fix")) {	// garbage로 !fix 메시지가 남아있는것 처리용도로 받은 다음, args로 고정한 번호 입력받은 것 intArray로 전환하여 swap
 	    		for (int i = 0; i < 2; i++) {
 	    			exchange[i] = Integer.parseInt(args[i])-1;
 	    			Collections.swap(names, i, exchange[i]);
@@ -118,15 +123,15 @@ public class MessageEventListener extends ListenerAdapter{
 	    			Collections.swap(NameAndTier, i, exchange[i]);
 	    		}
 	    		fixed = "on";
-	    		garbage[0] = "";
+	    		garbage = "";
 	    		end = true;
-    	} else if(garbage[0].equals("!수정")) { // 멤버 수정 로직
+    	} else if(garbage.equals("!수정")) { // 멤버 수정 로직
 	    	changeName = args;
 	    	currentPlayer -= args.length;
 	    	message.getChannel().sendMessage(currentPlayer + "번째 참여자를 입력하세요").queue();
     		modify = true;
     		end = false;
-    		garbage[0]="";
+    		garbage="";
 	    }
 	    
 	    // 최종 팀배정 로직
@@ -138,9 +143,12 @@ public class MessageEventListener extends ListenerAdapter{
 	    	message.getChannel().sendMessageEmbeds(embed).queue();
 	    }
 	    } catch (NumberFormatException e) {
-	    	message.getChannel().sendMessage("에러발생").queue();
+	    	message.getChannel().sendMessage("A-Type에러발생").queue();
 	    	e.printStackTrace();
-	    }
+	    } catch (Exception e) {
+	    	message.getChannel().sendMessage("B-Type 에러발생").queue();
+	    	e.printStackTrace();	    	
+		}
 	}
 
     private static int change(String tier) {
@@ -186,7 +194,7 @@ public class MessageEventListener extends ListenerAdapter{
 		case "브론즈":
 			score = 5;
 			break;
-		case "실버4":
+		case "실버4", "실", "실버":
 			score = 9;
 			break;
 		case "실버3":
@@ -198,7 +206,7 @@ public class MessageEventListener extends ListenerAdapter{
 		case "실버1":
 			score = 14;
 			break;
-		case "골드4":
+		case "골드4", "골드", "골":
 			score = 16;
 			break;
 		case "골드3":
@@ -210,7 +218,7 @@ public class MessageEventListener extends ListenerAdapter{
 		case "골드1":
 			score = 19;
 			break;
-		case "플레티넘4":
+		case "플레티넘4", "플레", "플":
 			score = 21;
 			break;
 		case "플레티넘3":
@@ -222,7 +230,7 @@ public class MessageEventListener extends ListenerAdapter{
 		case "플레티넘1":
 			score = 24;
 			break;
-		case "에메랄드4":
+		case "에메랄드4", "에메랄드", "에메", "에":
 			score = 26;
 			break;
 		case "에메랄드3":
@@ -234,7 +242,7 @@ public class MessageEventListener extends ListenerAdapter{
 		case "에메랄드1":
 			score = 29;
 			break;
-		case "다이아4":
+		case "다이아4", "다이아", "다":
 			score = 31;
 			break;
 		case "다이아3":
